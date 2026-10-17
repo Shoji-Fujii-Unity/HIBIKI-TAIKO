@@ -1,0 +1,1320 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+<title>響太鼓 — HIBIKI TAIKO</title>
+<style>
+:root{
+  --bg:#07090e;
+  --panel:#11141d;
+  --panel2:#151a26;
+  --text:#fff;
+  --red:#ff4d6d;
+  --blue:#4db2ff;
+  --gold:#ffd24d;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{
+  margin:0;padding:0;width:100%;height:100%;
+  overflow:hidden;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP","Noto Sans CJK SC","Noto Sans CJK TC","Segoe UI",Arial,sans-serif;
+  user-select:none;-webkit-user-select:none;
+  overscroll-behavior:none;
+}
+button{
+  border:0;border-radius:999px;color:#fff;font-weight:700;
+  padding:max(8px,1.6vmin) max(14px,3vmin);
+  font-size:max(14px,2.3vmin);
+  background:#3a4052;
+  box-shadow:0 3px 0 rgba(0,0,0,.45);
+  touch-action:manipulation;
+  cursor:pointer;
+}
+button:active{transform:translateY(2px);box-shadow:0 1px 0 rgba(0,0,0,.45)}
+button.primary{background:linear-gradient(135deg,#ff4d6d,#9a1030)}
+button.wide{min-width:min(70vw,420px)}
+
+#app{
+  position:fixed;left:0;top:0;
+  width:100vw;height:100vh;height:100dvh;
+  background:radial-gradient(1200px 700px at 50% 20%,#151d2a,#05070b);
+  overflow:hidden;
+}
+@media (orientation:portrait){
+  #app{
+    left:50%;top:50%;
+    width:100vh;width:100dvh;
+    height:100vw;
+    transform:translate(-50%,-50%) rotate(-90deg);
+    transform-origin:center center;
+  }
+}
+html.force-portrait #app{
+  left:50%;top:50%;
+  width:100vh;width:100dvh;
+  height:100vw;
+  transform:translate(-50%,-50%) rotate(-90deg);
+  transform-origin:center center;
+}
+
+#header{
+  position:absolute;left:0;right:0;top:0;
+  height:max(44px,7.5vmin);
+  z-index:100;
+  display:none;align-items:center;gap:1vmin;
+  padding:max(6px,1vmin) max(8px,1.5vmin);
+  background:linear-gradient(180deg,rgba(0,0,0,.55),rgba(0,0,0,0));
+}
+#header.active{display:flex}
+#headerTitle{
+  flex:1;font-weight:900;letter-spacing:.08em;
+  font-size:max(14px,3vmin);
+  text-shadow:0 0 10px rgba(255,80,120,.35);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#btnBack{min-width:max(42px,7vmin);font-size:max(18px,3.6vmin);padding:max(6px,1vmin)}
+
+.screen{
+  position:absolute;inset:0;
+  display:none;
+  flex-direction:column;
+  padding:max(48px,10vmin) max(10px,2vmin) max(12px,3vmin);
+  overflow:hidden;
+}
+.screen.active{display:flex}
+#screenGame{padding:0}
+
+.center{
+  flex:1;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:1.4vmin;
+  text-align:center;
+  overflow:auto;
+  padding:2vmin;
+}
+.panel{
+  flex:1;
+  overflow:auto;
+  padding:2vmin 0;
+  scrollbar-gutter:stable;
+}
+.panel h2{margin:0 0 2vmin;font-size:max(18px,4.5vmin);letter-spacing:.08em}
+h1{
+  margin:0;
+  font-size:max(28px,10vmin);
+  letter-spacing:.12em;
+  text-shadow:0 0 24px rgba(255,60,100,.45);
+}
+.latin{font-size:max(12px,2.6vmin);opacity:.85;letter-spacing:.22em}
+.subtitle{font-size:max(13px,2.9vmin);opacity:.9;margin-top:1vmin}
+.controls{
+  margin-top:3vmin;
+  white-space:pre-wrap;
+  font-size:max(12px,2.6vmin);
+  opacity:.88;
+  line-height:1.55;
+}
+.logo{
+  width:max(90px,28vmin);height:max(56px,18vmin);
+  position:relative;margin:0 auto 2vmin;
+}
+.donIcon{
+  position:absolute;left:22%;top:12%;
+  width:44%;height:76%;border-radius:50%;
+  background:radial-gradient(circle at 40% 40%,#ff8aa0,#d21033 65%,#720017);
+  border:4px solid #fff;
+  box-shadow:0 0 30px rgba(255,70,110,.35);
+}
+.katIcon{
+  position:absolute;right:8%;top:36%;
+  width:26%;height:42%;border-radius:50%;
+  border:8px solid #38b6ff;background:rgba(56,182,255,.08);
+  box-shadow:0 0 26px rgba(77,178,255,.32);
+}
+
+.btns{display:flex;gap:2vmin;flex-wrap:wrap;justify-content:center}
+.column{flex-direction:column;align-items:center}
+
+.songList{
+  display:grid;
+  gap:1.2vmin;
+  grid-template-columns:repeat(auto-fill,minmax(max(170px,26vmin),1fr));
+  touch-action:pan-y;
+}
+.song-card,
+.diff-card{
+  border:0;border-radius:14px;
+  background:linear-gradient(180deg,#181e2a,#10131c);
+  color:#fff;
+  border-left:10px solid #888;
+  padding:1.4vmin;
+  text-align:left;
+  box-shadow:0 4px 0 rgba(0,0,0,.35);
+  min-height:84px;
+}
+.song-card span,.diff-card span{display:block}
+.song-title,.diff-title{font-size:max(15px,3vmin);font-weight:900}
+.song-meta,.diff-meta,.song-best,.diff-best{font-size:max(12px,2.4vmin);opacity:.86;margin-top:.6vmin}
+.song-best,.diff-best{margin-top:1vmin;color:var(--gold)}
+.diff-card.easy{border-left-color:#78e07a}
+.diff-card.normal{border-left-color:var(--gold)}
+.diff-card.hard{border-left-color:var(--red)}
+
+#diffSong{font-size:max(14px,3vmin);margin:.8vmin 0 2vmin}
+
+#gameCanvas{position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none}
+#gameTop{
+  position:absolute;left:0;right:0;top:0;
+  padding:1vmin;
+  display:flex;gap:1vmin;align-items:flex-start;
+  z-index:20;pointer-events:none;
+}
+#gameTop button{pointer-events:auto}
+#gameSongInfo{display:none}
+
+#touchControls{
+  position:absolute;left:0;right:0;bottom:0;
+  height:max(92px,34%);
+  display:flex;gap:1.2vmin;
+  padding:1.2vmin;
+  z-index:20;
+  pointer-events:none;
+}
+.hit{
+  pointer-events:auto;
+  flex:1;
+  border-radius:22px;
+  border:4px solid #fff;
+  font-size:max(18px,5vmin);
+  font-weight:900;
+  letter-spacing:.1em;
+}
+.hit.don{
+  background:rgba(255,60,100,.24);
+  border-color:#ff4d6d;
+  color:#ffd8e2;
+}
+.hit.kat{
+  background:rgba(60,150,255,.22);
+  border-color:#4db2ff;
+  color:#d8e9ff;
+}
+.hit:active{filter:brightness(1.5);transform:scale(.98)}
+
+.rankBadge{
+  font-size:max(42px,16vmin);
+  font-weight:900;
+  line-height:1;
+  color:var(--gold);
+  text-shadow:0 0 28px rgba(255,210,77,.45);
+  margin:2vmin 0;
+}
+#resultText{
+  white-space:pre-wrap;
+  word-break:break-word;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:max(13px,2.6vmin);
+  background:rgba(255,255,255,.06);
+  padding:2vmin;
+  border-radius:14px;
+  max-height:48%;
+  overflow:auto;
+}
+.pausePanel{
+  max-width:70vw;
+  min-width:min(320px,80vw);
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="header">
+    <button id="btnBack" aria-label="Back">←</button>
+    <div id="headerTitle" data-i18n="title"></div>
+    <button id="btnLang"></button>
+    <button id="btnSound"></button>
+  </div>
+
+  <section id="screenTitle" class="screen active">
+    <div class="center">
+      <div class="logo">
+        <div class="donIcon"></div>
+        <div class="katIcon"></div>
+      </div>
+      <h1 data-i18n="title"></h1>
+      <div class="latin" data-i18n="titleLatin"></div>
+      <div class="subtitle" data-i18n="subtitle"></div>
+      <div class="btns">
+        <button class="primary wide" id="btnStart" data-i18n="start"></button>
+      </div>
+      <div class="controls" data-i18n="controls"></div>
+    </div>
+  </section>
+
+  <section id="screenSong" class="screen">
+    <div class="panel">
+      <h2 data-i18n="songSelect"></h2>
+      <div id="songList" class="songList"></div>
+    </div>
+  </section>
+
+  <section id="screenDiff" class="screen">
+    <div class="panel">
+      <h2 data-i18n="chooseDifficulty"></h2>
+      <div id="diffSong"></div>
+      <div id="diffList"></div>
+    </div>
+  </section>
+
+  <section id="screenGame" class="screen">
+    <canvas id="gameCanvas"></canvas>
+    <div id="gameTop">
+      <button id="btnPause" data-i18n="pause"></button>
+      <div id="gameSongInfo"></div>
+    </div>
+    <div id="touchControls">
+      <button id="btnDon" class="hit don"></button>
+      <button id="btnKat" class="hit kat"></button>
+    </div>
+  </section>
+
+  <section id="screenResult" class="screen">
+    <div class="center">
+      <h2 data-i18n="result"></h2>
+      <div id="resultRank" class="rankBadge"></div>
+      <pre id="resultText"></pre>
+      <div class="btns">
+        <button class="primary" id="btnRetry" data-i18n="retry"></button>
+        <button id="btnToSong" data-i18n="songSelect"></button>
+        <button id="btnToTitle" data-i18n="home"></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="screenPause" class="screen">
+    <div class="center">
+      <div class="pausePanel">
+        <h2 data-i18n="pause"></h2>
+        <div class="btns column">
+          <button class="primary wide" id="btnResume" data-i18n="resume"></button>
+          <button class="wide" id="btnQuit" data-i18n="quit"></button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+const SAVE_KEY = "hibiki_taiko_v1";
+const LANGS = ["ja", "en", "zh"];
+const PERFECT_WINDOW = 0.075;
+const GOOD_WINDOW = 0.155;
+const BAD_WINDOW = 0.26;
+const COUNTDOWN_MS = 3000;
+
+let save = {
+  lang: "ja",
+  sound: true,
+  best: {}
+};
+
+const I18N = {
+  ja: {
+    title: "響太鼓",
+    titleLatin: "HIBIKI TAIKO",
+    subtitle: "和太鼓リズムゲーム",
+    start: "はじめる",
+    home: "タイトル",
+    songSelect: "曲選択",
+    chooseDifficulty: "難易度選択",
+    pause: "一時停止",
+    resume: "続ける",
+    quit: "やめる",
+    back: "←",
+    controls: "PC: F = ドン / J = カタ\nスマホ: 左 = ドン, 右 = カタ",
+    languageName: "日本語",
+    soundOn: "サウンド ON",
+    soundOff: "サウンド OFF",
+    easy: "かんたん",
+    normal: "ふつう",
+    hard: "むずかしい",
+    don: "ドン",
+    kat: "カタ",
+    result: "RESULT",
+    retry: "リトライ",
+    score: "SCORE",
+    maxCombo: "MAX COMBO",
+    accuracy: "達成率",
+    best: "BEST",
+    none: "--",
+    bpm: "BPM",
+    perfect: "PERFECT",
+    good: "GOOD",
+    bad: "BAD",
+    miss: "MISS",
+    rank: "RANK"
+  },
+  en: {
+    title: "Hibiki Taiko",
+    titleLatin: "HIBIKI TAIKO",
+    subtitle: "Japanese Drum Rhythm Game",
+    start: "START",
+    home: "HOME",
+    songSelect: "SONG SELECT",
+    chooseDifficulty: "DIFFICULTY",
+    pause: "PAUSE",
+    resume: "RESUME",
+    quit: "QUIT",
+    back: "←",
+    controls: "PC: F = DON / J = KAT\nMobile: Left = DON, Right = KAT",
+    languageName: "English",
+    soundOn: "SOUND ON",
+    soundOff: "SOUND OFF",
+    easy: "EASY",
+    normal: "NORMAL",
+    hard: "HARD",
+    don: "DON",
+    kat: "KAT",
+    result: "RESULT",
+    retry: "RETRY",
+    score: "SCORE",
+    maxCombo: "MAX COMBO",
+    accuracy: "ACCURACY",
+    best: "BEST",
+    none: "--",
+    bpm: "BPM",
+    perfect: "PERFECT",
+    good: "GOOD",
+    bad: "BAD",
+    miss: "MISS",
+    rank: "RANK"
+  },
+  zh: {
+    title: "響太鼓",
+    titleLatin: "HIBIKI TAIKO",
+    subtitle: "和太鼓节奏游戏",
+    start: "开始",
+    home: "标题",
+    songSelect: "选择乐曲",
+    chooseDifficulty: "难度选择",
+    pause: "暂停",
+    resume: "继续",
+    quit: "退出",
+    back: "←",
+    controls: "PC: F = 咚 / J = 咔\n手机: 左 = 咚, 右 = 咔",
+    languageName: "中文",
+    soundOn: "音效 开",
+    soundOff: "音效 关",
+    easy: "简单",
+    normal: "普通",
+    hard: "困难",
+    don: "咚",
+    kat: "咔",
+    result: "结果",
+    retry: "重试",
+    score: "分数",
+    maxCombo: "最大连击",
+    accuracy: "达成率",
+    best: "最佳",
+    none: "--",
+    bpm: "BPM",
+    perfect: "PERFECT",
+    good: "GOOD",
+    bad: "BAD",
+    miss: "MISS",
+    rank: "RANK"
+  }
+};
+
+const SONGS = [
+  {id:1,bpm:112,bars:8,seed:1001,color:"#ff5577",title:{ja:"桜の刻",en:"Sakura Moment",zh:"樱之刻"}},
+  {id:2,bpm:132,bars:10,seed:1002,color:"#ffb300",title:{ja:"雷太鼓",en:"Thunder Drum",zh:"雷太鼓"}},
+  {id:3,bpm:96,bars:10,seed:1003,color:"#6c63ff",title:{ja:"月夜祭",en:"Moon Festival",zh:"月夜祭"}},
+  {id:4,bpm:148,bars:12,seed:1004,color:"#2ed573",title:{ja:"龍の舞",en:"Dragon Dance",zh:"龙舞"}},
+  {id:5,bpm:162,bars:12,seed:1005,color:"#ff6b81",title:{ja:"花火大会",en:"Hanabi Fireworks",zh:"花火大会"}},
+  {id:6,bpm:84,bars:10,seed:1006,color:"#19d3ff",title:{ja:"静かな水面",en:"Still Water",zh:"静水"}},
+  {id:7,bpm:166,bars:12,seed:1007,color:"#4db2ff",title:{ja:"荒波",en:"Rough Waves",zh:"波涛"}},
+  {id:8,bpm:108,bars:10,seed:1008,color:"#ffaa00",title:{ja:"神社の参道",en:"Shrine Path",zh:"神社参道"}},
+  {id:9,bpm:172,bars:12,seed:1009,color:"#ff3b3b",title:{ja:"疾風太鼓",en:"Hayate Taiko",zh:"疾风太鼓"}},
+  {id:10,bpm:92,bars:10,seed:1010,color:"#ff7a45",title:{ja:"篝火",en:"Campfire",zh:"篝火"}},
+  {id:11,bpm:128,bars:12,seed:1011,color:"#f368e0",title:{ja:"祭りの夜",en:"Festival Night",zh:"祭夜"}},
+  {id:12,bpm:124,bars:12,seed:1012,color:"#a29bfe",title:{ja:"山彦",en:"Mountain Echo",zh:"山彦"}},
+  {id:13,bpm:144,bars:12,seed:1013,color:"#57d7ff",title:{ja:"銀河の調べ",en:"Galaxy Rhythm",zh:"银河韵律"}},
+  {id:14,bpm:116,bars:10,seed:1014,color:"#f1f2f6",title:{ja:"白狐",en:"White Fox",zh:"白狐"}},
+  {id:15,bpm:136,bars:12,seed:1015,color:"#ffd700",title:{ja:"金閣",en:"Golden Pavilion",zh:"金阁"}},
+  {id:16,bpm:88,bars:10,seed:1016,color:"#2f6bff",title:{ja:"深海",en:"Deep Sea",zh:"深海"}},
+  {id:17,bpm:156,bars:12,seed:1017,color:"#ff4d6d",title:{ja:"鬼退治",en:"Oni Hunt",zh:"鬼退治"}},
+  {id:18,bpm:174,bars:14,seed:1018,color:"#00e5ff",title:{ja:"永遠の鼓",en:"Eternal Drum",zh:"永恒之鼓"}}
+];
+
+const BANKS = [
+  [
+    [[0,0],[8,0]],
+    [[0,0],[4,0],[8,0],[12,0]],
+    [[0,0],[6,1],[8,0]],
+    [[0,0],[4,0],[8,0]],
+    [[0,0],[6,1],[10,1]]
+  ],
+  [
+    [[0,0],[4,0],[8,0],[12,0]],
+    [[0,0],[2,1],[4,0],[6,1],[8,0],[10,1],[12,0],[14,1]],
+    [[0,0],[3,1],[4,0],[7,1],[8,0],[11,1],[12,0]],
+    [[0,0],[4,0],[6,1],[8,0],[12,0],[14,1]],
+    [[0,0],[2,0],[4,0],[6,1],[8,0],[10,0],[12,0],[14,1]],
+    [[0,0],[4,0],[7,1],[8,0],[12,0],[14,1]]
+  ],
+  [
+    [[0,0],[1,1],[2,0],[3,1],[4,0],[6,1],[8,0],[10,1],[12,0],[14,0],[15,1]],
+    [[0,0],[2,0],[4,0],[6,0],[8,0],[10,1],[12,0],[13,1],[14,1],[15,1]],
+    [[0,0],[4,0],[5,1],[6,0],[7,1],[8,0],[12,0],[13,1],[14,1],[15,1]],
+    [[0,0],[2,1],[3,1],[4,0],[8,0],[10,1],[11,1],[12,0],[14,1],[15,1]],
+    [[0,0],[1,0],[2,1],[3,0],[4,1],[5,1],[6,0],[7,1],[8,0],[12,0],[14,1]],
+    [[0,0],[4,0],[6,0],[7,1],[8,0],[10,0],[11,1],[12,0],[13,1],[14,0],[15,1]]
+  ]
+];
+
+let currentScreen = "title";
+let selectedSong = null;
+let selectedDiff = 0;
+
+let canvas, ctx;
+let viewW = 0, viewH = 0, dpr = 1;
+
+let chart = [];
+let current = 0;
+let startPerf = 0;
+let pausedElapsed = 0;
+let running = false;
+let raf = 0;
+
+let score = 0;
+let combo = 0;
+let maxCombo = 0;
+let counts = {perfect:0, good:0, bad:0, miss:0};
+let missPtr = 0;
+let audioBeatPtr = 0;
+let audioNotePtr = 0;
+let effects = [];
+let shake = 0;
+
+let audioCtx = null;
+let masterGain = null;
+
+function $(id){ return document.getElementById(id); }
+function t(key){
+  return (I18N[save.lang] && I18N[save.lang][key]) || I18N.ja[key] || key;
+}
+function songTitle(s){
+  return s.title[save.lang] || s.title.en || s.title.ja;
+}
+function esc(s){
+  return String(s).replace(/[&<>"']/g, c => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+function diffName(d){ return t(d===0?"easy":d===1?"normal":"hard"); }
+
+function loadSave(){
+  try{
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(raw){
+      const s = JSON.parse(raw);
+      save.sound = typeof s.sound === "boolean" ? s.sound : true;
+      save.lang = LANGS.includes(s.lang) ? s.lang : "ja";
+      save.best = s.best && typeof s.best === "object" ? s.best : {};
+    }
+  }catch(e){}
+}
+function saveSave(){
+  try{
+    localStorage.setItem(SAVE_KEY, JSON.stringify(save));
+  }catch(e){}
+}
+
+function applyOrientation(){
+  const portrait = window.innerWidth < window.innerHeight;
+  document.documentElement.classList.toggle("force-portrait", portrait);
+}
+
+function updateStaticText(){
+  document.documentElement.lang = save.lang;
+  document.title = t("title") + " — " + t("titleLatin");
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = t(el.dataset.i18n);
+  });
+  $("btnDon").textContent = `${t("don")} (F)`;
+  $("btnKat").textContent = `${t("kat")} (J)`;
+  if(selectedSong){
+    $("gameSongInfo").textContent = `${songTitle(selectedSong)} / ${diffName(selectedDiff)}`;
+  }
+}
+function updateButtons(){
+  $("btnLang").textContent = "🌐 " + t("languageName");
+  $("btnSound").textContent = (save.sound ? "🔊 " : "🔇 ") + (save.sound ? t("soundOn") : t("soundOff"));
+}
+function applyLanguage(){
+  updateStaticText();
+  updateButtons();
+  if(currentScreen === "song") renderSongs();
+  if(currentScreen === "diff") renderDiff();
+}
+
+function showScreen(id){
+  currentScreen = id;
+  const screenId = "screen" + id.charAt(0).toUpperCase() + id.slice(1);
+  document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === screenId));
+  $("header").classList.toggle("active", id !== "game");
+  $("btnBack").style.visibility = id === "title" ? "hidden" : "visible";
+  if(id === "game") resizeCanvas();
+  if(id === "song") renderSongs();
+  if(id === "diff") renderDiff();
+}
+function goBack(){
+  if(currentScreen === "pause") resumeGame();
+  else if(currentScreen === "result") showScreen("diff");
+  else if(currentScreen === "diff") showScreen("song");
+  else if(currentScreen === "song") showScreen("title");
+  else showScreen("title");
+}
+
+function getBestAny(song){
+  let best = null;
+  for(let d=0; d<3; d++){
+    const b = save.best[song.id + "_" + d];
+    if(b && (!best || b.score > best.score)) best = b;
+  }
+  return best;
+}
+
+function renderSongs(){
+  const list = $("songList");
+  list.innerHTML = "";
+  SONGS.forEach(song => {
+    const best = getBestAny(song);
+    const bestText = best ? `${best.rank} / ${best.score}` : t("none");
+    const card = document.createElement("button");
+    card.className = "song-card";
+    card.style.borderLeftColor = song.color;
+    card.innerHTML =
+      `<span class="song-title">${esc(songTitle(song))}</span>` +
+      `<span class="song-meta">${esc(t("bpm"))}: ${song.bpm}</span>` +
+      `<span class="song-best">${esc(t("best"))}: ${esc(bestText)}</span>`;
+    card.addEventListener("click", () => openDiff(song));
+    list.appendChild(card);
+  });
+}
+
+function openDiff(song){
+  selectedSong = song;
+  showScreen("diff");
+}
+
+function renderDiff(){
+  if(!selectedSong){ showScreen("song"); return; }
+  const song = selectedSong;
+  $("diffSong").textContent = `${songTitle(song)} - BPM ${song.bpm}`;
+  const list = $("diffList");
+  list.innerHTML = "";
+  for(let d=0; d<3; d++){
+    const b = save.best[song.id + "_" + d];
+    const bestText = b ? `${b.rank} / ${b.score}` : t("none");
+    const card = document.createElement("button");
+    card.className = "diff-card " + (d===0?"easy":d===1?"normal":"hard");
+    card.innerHTML =
+      `<span class="diff-title">${esc(diffName(d))}</span>` +
+      `<span class="diff-meta">${esc(t("bpm"))}: ${song.bpm}</span>` +
+      `<span class="diff-best">${esc(t("best"))}: ${esc(bestText)}</span>`;
+    card.addEventListener("click", () => startGame(song, d));
+    list.appendChild(card);
+  }
+}
+
+function startGame(song, diff){
+  selectedSong = song;
+  selectedDiff = diff;
+  chart = generateChart(song, diff);
+  score = 0;
+  combo = 0;
+  maxCombo = 0;
+  counts = {perfect:0, good:0, bad:0, miss:0};
+  missPtr = 0;
+  audioBeatPtr = 0;
+  audioNotePtr = 0;
+  effects = [];
+  shake = 0;
+  pausedElapsed = 0;
+  current = -COUNTDOWN_MS / 1000;
+
+  if(save.sound) ensureAudio();
+  setMasterGain(save.sound ? 0.7 : 0);
+
+  $("gameSongInfo").textContent = `${songTitle(song)} / ${diffName(diff)}`;
+  showScreen("game");
+  resizeCanvas();
+  running = true;
+  startPerf = performance.now() + COUNTDOWN_MS;
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(loop);
+}
+
+function pauseGame(){
+  if(!running) return;
+  running = false;
+  cancelAnimationFrame(raf);
+  pausedElapsed = current;
+  setMasterGain(0);
+  showScreen("pause");
+}
+function resumeGame(){
+  if(!selectedSong || !chart.length) { showScreen("song"); return; }
+  startPerf = performance.now() - pausedElapsed * 1000;
+  if(save.sound) setMasterGain(0.7);
+  showScreen("game");
+  running = true;
+  cancelAnimationFrame(raf);
+  raf = requestAnimationFrame(loop);
+}
+function quitGame(){
+  running = false;
+  cancelAnimationFrame(raf);
+  setMasterGain(0);
+  showScreen("diff");
+}
+
+function loop(){
+  if(!running || currentScreen !== "game") return;
+  update();
+  draw();
+  raf = requestAnimationFrame(loop);
+}
+
+function update(){
+  current = (performance.now() - startPerf) / 1000;
+
+  if(save.sound) scheduleAudio();
+
+  while(missPtr < chart.length && chart[missPtr].time + BAD_WINDOW < current){
+    const n = chart[missPtr];
+    if(!n.hit && !n.miss){
+      n.miss = true;
+      combo = 0;
+      counts.miss++;
+    }
+    missPtr++;
+  }
+
+  for(let i=effects.length-1; i>=0; i--){
+    if(current - effects[i].born > 0.35) effects.splice(i,1);
+  }
+  shake *= 0.86;
+  if(shake < 0.05) shake = 0;
+
+  if(!chart.length || current > chart[chart.length-1].time + 2.0){
+    endGame();
+  }
+}
+
+function targetPos(){
+  const W = viewW || 800;
+  const H = viewH || 450;
+  const R = Math.max(22, Math.min(W,H) * 0.075);
+  return {x: W*0.5, y: H*0.44, R};
+}
+
+function press(type){
+  if(currentScreen !== "game" || !running) return;
+  if(save.sound) ensureAudio();
+  const n = findNearestNote(type);
+  if(n){
+    judge(n);
+    playHit(type);
+  }
+}
+
+function findNearestNote(type){
+  const loTime = current - BAD_WINDOW;
+  let lo = 0, hi = chart.length;
+  while(lo < hi){
+    const mid = (lo + hi) >> 1;
+    if(chart[mid].time < loTime) lo = mid + 1;
+    else hi = mid;
+  }
+  let best = null;
+  let bestD = BAD_WINDOW + 1;
+  for(let i=Math.max(0, lo-8); i<chart.length; i++){
+    const n = chart[i];
+    if(n.time > current + BAD_WINDOW) break;
+    if(n.hit || n.miss || n.type !== type) continue;
+    const d = Math.abs(n.time - current);
+    if(d <= BAD_WINDOW && d < bestD){
+      bestD = d;
+      best = n;
+    }
+  }
+  return best;
+}
+
+function judge(note){
+  const d = Math.abs(note.time - current);
+  let grade;
+  if(d <= PERFECT_WINDOW){
+    grade = "perfect";
+    score += 1000;
+    combo++;
+    counts.perfect++;
+  }else if(d <= GOOD_WINDOW){
+    grade = "good";
+    score += 500;
+    combo++;
+    counts.good++;
+  }else{
+    grade = "bad";
+    score += 100;
+    combo = 0;
+    counts.bad++;
+  }
+  note.hit = true;
+  note.grade = grade;
+  maxCombo = Math.max(maxCombo, combo);
+
+  const tp = targetPos();
+  const color = grade === "perfect" ? "#ffffff" : grade === "good" ? "#ffd24d" : "#ff5577";
+  effects.push({born:current,x:tp.x,y:tp.y,r:grade==="perfect"?tp.R*0.75:tp.R*0.55,color});
+  shake = Math.min(18, shake + (grade === "perfect" ? 9 : grade === "good" ? 5 : 2));
+}
+
+function endGame(){
+  if(!running) return;
+  running = false;
+  cancelAnimationFrame(raf);
+  setMasterGain(0);
+  updateBest();
+  showResult();
+  showScreen("result");
+}
+
+function calcRank(sc, noteCount){
+  if(noteCount <= 0) return "D";
+  const pct = (sc / (noteCount * 1000)) * 100;
+  if(pct >= 99.5) return "S";
+  if(pct >= 95) return "A";
+  if(pct >= 85) return "B";
+  if(pct >= 70) return "C";
+  return "D";
+}
+function calcAccuracy(){
+  const total = chart.length || 1;
+  return ((counts.perfect + counts.good * 0.5 + counts.bad * 0.1) / total) * 100;
+}
+function updateBest(){
+  if(!selectedSong) return;
+  const key = selectedSong.id + "_" + selectedDiff;
+  const rank = calcRank(score, chart.length);
+  const prev = save.best[key];
+  const plays = ((prev && prev.plays) || 0) + 1;
+  if(!prev || score > prev.score || (score === prev.score && maxCombo > prev.maxCombo)){
+    save.best[key] = {score, maxCombo, rank, plays};
+  }else{
+    prev.plays = plays;
+  }
+  saveSave();
+}
+function showResult(){
+  const key = selectedSong.id + "_" + selectedDiff;
+  const rank = calcRank(score, chart.length);
+  const best = save.best[key] || {score:0,maxCombo:0,rank:"-",plays:0};
+  const lines = [
+    `${t("song")}: ${songTitle(selectedSong)}`,
+    `${t("difficulty")}: ${diffName(selectedDiff)}`,
+    "",
+    `${t("score")}: ${score}`,
+    `${t("maxCombo")}: ${maxCombo}`,
+    `${t("accuracy")}: ${calcAccuracy().toFixed(2)}%`,
+    "",
+    `${t("perfect")}: ${counts.perfect}`,
+    `${t("good")}: ${counts.good}`,
+    `${t("bad")}: ${counts.bad}`,
+    `${t("miss")}: ${counts.miss}`,
+    "",
+    `${t("best")}: ${best.rank} / ${best.score}`,
+    `${t("rank")}: ${rank}`
+  ];
+  $("resultRank").textContent = rank;
+  $("resultText").textContent = lines.join("\n");
+}
+
+function resizeCanvas(){
+  canvas = $("gameCanvas");
+  ctx = canvas.getContext("2d");
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  if(w < 20 || h < 20) return;
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  viewW = w;
+  viewH = h;
+  canvas.width = Math.floor(w * dpr);
+  canvas.height = Math.floor(h * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+
+function draw(){
+  if(!ctx || !selectedSong) return;
+  if(!viewW) resizeCanvas();
+
+  const W = viewW, H = viewH;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+
+  const bg = ctx.createLinearGradient(0, 0, 0, H);
+  bg.addColorStop(0, "#0a111d");
+  bg.addColorStop(1, "#05070b");
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const shakeX = (Math.random() - 0.5) * shake;
+  const shakeY = (Math.random() - 0.5) * shake;
+  ctx.save();
+  ctx.translate(shakeX, shakeY);
+
+  const tp = targetPos();
+  const R = tp.R;
+  const laneY = tp.y;
+  const targetX = tp.x;
+  const approach = 1.28;
+  const speed = (W + 120 - targetX) / approach;
+
+  ctx.strokeStyle = "rgba(255,255,255,.06)";
+  ctx.lineWidth = R * 1.9;
+  ctx.beginPath();
+  ctx.moveTo(0, laneY);
+  ctx.lineTo(W, laneY);
+  ctx.stroke();
+
+  const spb = 60 / selectedSong.bpm;
+  const phase = ((current % spb) + spb) % spb;
+  const pulse = current > 0 ? Math.max(0, 1 - phase / 0.09) : 0;
+
+  ctx.save();
+  ctx.translate(targetX, laneY);
+  const scale = 1 + pulse * 0.08;
+  ctx.scale(scale, scale);
+
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 1.25, 0, Math.PI * 2);
+  ctx.strokeStyle = "rgba(77,178,255," + (0.55 + pulse*0.35) + ")";
+  ctx.lineWidth = Math.max(6, R * 0.16);
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.arc(0, 0, R * 0.85, 0, Math.PI * 2);
+  ctx.fillStyle = "rgba(255,60,100,.78)";
+  ctx.fill();
+  ctx.strokeStyle = "rgba(255,255,255," + (0.85 + pulse*0.15) + ")";
+  ctx.lineWidth = Math.max(4, R * 0.1);
+  ctx.stroke();
+  ctx.restore();
+
+  for(const n of chart){
+    if(n.hit || n.miss) continue;
+    const rel = n.time - current;
+    if(rel < -approach || rel > approach + 0.3) continue;
+    const x = targetX + rel * speed;
+    if(x < -140 || x > W + 140) continue;
+
+    if(n.type === 0){
+      const r = R * 0.84;
+      ctx.shadowBlur = 22;
+      ctx.shadowColor = "rgba(255,70,110,.8)";
+      ctx.fillStyle = "#ff3d5e";
+      ctx.beginPath();
+      ctx.arc(x, laneY, r, 0, Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = Math.max(4, r * 0.12);
+      ctx.stroke();
+      ctx.fillStyle = "rgba(0,0,0,.22)";
+      ctx.beginPath();
+      ctx.arc(x, laneY, r * 0.35, 0, Math.PI*2);
+      ctx.fill();
+    }else{
+      const r = R * 0.62;
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = "rgba(77,178,255,.8)";
+      ctx.strokeStyle = "#38b6ff";
+      ctx.lineWidth = Math.max(5, r * 0.22);
+      ctx.beginPath();
+      ctx.arc(x, laneY, r, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      ctx.strokeStyle = "rgba(255,255,255,.8)";
+      ctx.lineWidth = Math.max(2, r * 0.08);
+      ctx.beginPath();
+      ctx.arc(x, laneY, r * 0.55, 0, Math.PI*2);
+      ctx.stroke();
+    }
+  }
+
+  for(const e of effects){
+    const age = current - e.born;
+    if(age < 0 || age > 0.35) continue;
+    const p = age / 0.35;
+    ctx.globalAlpha = 1 - p;
+    ctx.strokeStyle = e.color;
+    ctx.lineWidth = Math.max(2, 12 * (1 - p));
+    ctx.beginPath();
+    ctx.arc(e.x, e.y, e.r * (1 + p * 1.1), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.restore();
+
+  ctx.fillStyle = "rgba(0,0,0,.55)";
+  ctx.fillRect(0, 0, W, Math.max(28, H*0.075));
+
+  ctx.fillStyle = "#fff";
+  ctx.font = "bold " + Math.max(14, Math.floor(H*0.042)) + "px sans-serif";
+  ctx.fillText(t("score") + ": " + score, 10, Math.max(20, H*0.048));
+
+  const total = chart.length || 1;
+  const done = counts.perfect + counts.good + counts.bad + counts.miss;
+  const barX = W * 0.22;
+  const barY = Math.max(10, H*0.025);
+  const barW = W * 0.56;
+  const barH = Math.max(4, H*0.012);
+  ctx.fillStyle = "rgba(255,255,255,.15)";
+  ctx.fillRect(barX, barY, barW, barH);
+  ctx.fillStyle = "#ffd24d";
+  ctx.fillRect(barX, barY, barW * (done / total), barH);
+
+  if(combo > 1){
+    const fs = Math.max(20, Math.min(72, H*0.11 + combo * 0.4));
+    ctx.font = "bold " + fs + "px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#ffd24d";
+    ctx.fillText(String(combo), targetX, laneY - R * 1.8);
+    ctx.fillStyle = "rgba(255,210,77,.7)";
+    ctx.font = "bold " + Math.max(12, H*0.035) + "px sans-serif";
+    ctx.fillText("COMBO", targetX, laneY - R * 1.25);
+    ctx.textAlign = "left";
+  }
+
+  if(current < 0.35){
+    const remain = -current;
+    let text = "";
+    if(remain > 0.65){
+      const n = Math.max(1, Math.min(3, Math.floor(remain - 0.65) + 1));
+      text = String(n);
+    }else{
+      text = "GO!";
+    }
+    ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(255,255,255,.88)";
+    ctx.font = "bold " + Math.max(48, Math.floor(H * 0.18)) + "px sans-serif";
+    ctx.fillText(text, W/2, H/2);
+    ctx.textAlign = "left";
+  }
+}
+
+function ensureAudio(){
+  if(audioCtx){
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    setMasterGain(save.sound ? 0.7 : 0);
+    return;
+  }
+  try{
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if(!AC) return;
+    audioCtx = new AC();
+    masterGain = audioCtx.createGain();
+    masterGain.gain.value = save.sound ? 0.7 : 0;
+    masterGain.connect(audioCtx.destination);
+  }catch(e){
+    audioCtx = null;
+    masterGain = null;
+  }
+}
+function setMasterGain(v){
+  if(!audioCtx || !masterGain) return;
+  try{
+    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(Math.max(0, Math.min(1, v)), audioCtx.currentTime);
+  }catch(e){}
+}
+function playTaiko(type, when, vol = 0.7){
+  if(!audioCtx || !masterGain || !save.sound) return;
+  try{
+    when = Math.max(when, audioCtx.currentTime + 0.001);
+
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    if(type === 0){
+      o.type = "sine";
+      o.frequency.setValueAtTime(180, when);
+      o.frequency.exponentialRampToValueAtTime(68, when + 0.22);
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.linearRampToValueAtTime(vol, when + 0.005);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + 0.3);
+    }else{
+      o.type = "square";
+      o.frequency.setValueAtTime(1150, when);
+      o.frequency.exponentialRampToValueAtTime(420, when + 0.09);
+      g.gain.setValueAtTime(0.0001, when);
+      g.gain.linearRampToValueAtTime(vol * 0.36, when + 0.004);
+      g.gain.exponentialRampToValueAtTime(0.0001, when + 0.14);
+    }
+    o.connect(g).connect(masterGain);
+    o.start(when);
+    o.stop(when + 0.36);
+
+    const c = audioCtx.createOscillator();
+    const cg = audioCtx.createGain();
+    c.type = "triangle";
+    c.frequency.setValueAtTime(type === 0 ? 700 : 2200, when);
+    c.frequency.exponentialRampToValueAtTime(type === 0 ? 220 : 850, when + 0.03);
+    cg.gain.setValueAtTime(0.0001, when);
+    cg.gain.linearRampToValueAtTime(vol * 0.2, when + 0.002);
+    cg.gain.exponentialRampToValueAtTime(0.0001, when + 0.07);
+    c.connect(cg).connect(masterGain);
+    c.start(when);
+    c.stop(when + 0.09);
+  }catch(e){}
+}
+function playTick(when, strong){
+  if(!audioCtx || !masterGain || !save.sound) return;
+  try{
+    when = Math.max(when, audioCtx.currentTime + 0.001);
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = "sine";
+    o.frequency.setValueAtTime(strong ? 950 : 1350, when);
+    g.gain.setValueAtTime(0.0001, when);
+    g.gain.linearRampToValueAtTime(strong ? 0.055 : 0.028, when + 0.002);
+    g.gain.exponentialRampToValueAtTime(0.0001, when + 0.05);
+    o.connect(g).connect(masterGain);
+    o.start(when);
+    o.stop(when + 0.06);
+  }catch(e){}
+}
+function playHit(type){
+  if(!audioCtx) return;
+  playTaiko(type, audioCtx.currentTime, 0.82);
+}
+
+function scheduleAudio(){
+  if(!audioCtx || !save.sound || !selectedSong) return;
+
+  const spb = 60 / selectedSong.bpm;
+  const totalBeats = selectedSong.bars * 4 + 2;
+  const LOOK_BEAT = 0.13;
+  const LOOK_NOTE = 0.13;
+  const NOTE_LEAD = 0.05;
+
+  while(audioBeatPtr < totalBeats){
+    const bt = audioBeatPtr * spb;
+    if(bt > current + LOOK_BEAT) break;
+    if(bt > current + 0.02){
+      const when = audioCtx.currentTime + (bt - current);
+      if(when > audioCtx.currentTime) playTick(when, audioBeatPtr % 4 === 0);
+    }
+    audioBeatPtr++;
+  }
+
+  while(audioNotePtr < chart.length){
+    const n = chart[audioNotePtr];
+    if(n.time > current + LOOK_NOTE) break;
+    if(n.time > current + NOTE_LEAD && !n.hit && !n.miss && !n.guide){
+      const when = audioCtx.currentTime + (n.time - current);
+      if(when > audioCtx.currentTime){
+        playTaiko(n.type, when, 0.05);
+        n.guide = true;
+      }
+    }
+    audioNotePtr++;
+  }
+}
+
+function mulberry32(a){
+  return function(){
+    a |= 0;
+    a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function generateChart(song, diff){
+  const rng = mulberry32(song.seed * 1000 + diff * 911 + song.id * 17 + 12345);
+  const stepDur = 60 / song.bpm / 4;
+  const totalBars = song.bars;
+  const minGap = [0.2, 0.115, 0.085][diff];
+
+  let notes = [];
+  let lastTime = -99999;
+
+  function pushNote(bar, s, type){
+    const time = (bar * 16 + s) * stepDur;
+    if(time - lastTime < minGap) return;
+    lastTime = time;
+    notes.push({
+      time,
+      type,
+      hit: false,
+      miss: false,
+      guide: false,
+      grade: ""
+    });
+  }
+
+  for(let bar=0; bar<totalBars; bar++){
+    const prog = bar / Math.max(1, totalBars - 1);
+    const fill = (bar % 8 === 7);
+    let intensity;
+    if(bar < 2) intensity = 0;
+    else if(prog < 0.3) intensity = 0.35;
+    else if(prog < 0.65) intensity = 0.6;
+    else intensity = 0.9;
+
+    let useBank = diff;
+    if(bar < 2) useBank = 0;
+    else if(bar < Math.floor(totalBars * 0.25)) useBank = diff === 0 ? 0 : Math.min(1, diff - 1);
+    else if(intensity < 0.55) useBank = diff === 0 ? 0 : Math.min(1, diff - 1);
+    else useBank = diff;
+
+    if(fill && diff > 0) useBank = Math.max(useBank, diff);
+
+    const bank = BANKS[Math.max(0, Math.min(2, useBank))];
+    const tmpl = bank[Math.floor(rng() * bank.length)];
+    for(const item of tmpl) pushNote(bar, item[0], item[1]);
+
+    if(intensity > 0.75 && diff > 0 && rng() < 0.32) pushNote(bar, 12, 0);
+    if(fill && diff > 0 && rng() < 0.5){
+      const st = rng() < 0.5 ? 8 : 0;
+      for(let s=st; s<st+8 && s<16; s++){
+        pushNote(bar, s, rng() < 0.4 ? 1 : 0);
+      }
+    }
+  }
+
+  notes.sort((a,b) => a.time - b.time);
+
+  let out = [];
+  let lt = -99999;
+  for(const n of notes){
+    if(n.time - lt >= minGap){
+      out.push(n);
+      lt = n.time;
+    }
+  }
+
+  if(out.length < 8){
+    out = [];
+    for(let bar=0; bar<totalBars; bar++){
+      for(const s of [0,4,8,12]){
+        out.push({time:(bar*16+s)*stepDur, type:0, hit:false, miss:false, guide:false, grade:""});
+      }
+    }
+  }
+  return out;
+}
+
+function bindEvents(){
+  $("btnStart").addEventListener("click", () => showScreen("song"));
+  $("btnBack").addEventListener("click", goBack);
+  $("btnLang").addEventListener("click", () => {
+    const i = LANGS.indexOf(save.lang);
+    save.lang = LANGS[(i + 1) % LANGS.length];
+    saveSave();
+    applyLanguage();
+  });
+  $("btnSound").addEventListener("click", () => {
+    save.sound = !save.sound;
+    saveSave();
+    ensureAudio();
+    setMasterGain(save.sound ? 0.7 : 0);
+    updateButtons();
+  });
+
+  $("btnPause").addEventListener("click", pauseGame);
+  $("btnResume").addEventListener("click", resumeGame);
+  $("btnQuit").addEventListener("click", quitGame);
+  $("btnRetry").addEventListener("click", () => startGame(selectedSong, selectedDiff));
+  $("btnToSong").addEventListener("click", () => showScreen("song"));
+  $("btnToTitle").addEventListener("click", () => showScreen("title"));
+
+  $("btnDon").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    press(0);
+  });
+  $("btnKat").addEventListener("pointerdown", e => {
+    e.preventDefault();
+    press(1);
+  });
+
+  window.addEventListener("keydown", e => {
+    if(e.repeat) return;
+    if(save.sound) ensureAudio();
+
+    if(currentScreen === "game" && !running && (e.code === "Enter" || e.code === "Space")){
+      e.preventDefault();
+      return;
+    }
+
+    if(currentScreen === "title" && (e.code === "Enter" || e.code === "Space")){
+      e.preventDefault();
+      showScreen("song");
+      return;
+    }
+
+    if(e.code === "KeyF" || e.code === "KeyD"){
+      e.preventDefault();
+      press(0);
+    }
+    if(e.code === "KeyJ" || e.code === "KeyK"){
+      e.preventDefault();
+      press(1);
+    }
+    if(e.code === "Escape" && currentScreen === "game"){
+      e.preventDefault();
+      pauseGame();
+    }
+  });
+
+  document.addEventListener("contextmenu", e => e.preventDefault());
+
+  document.addEventListener("visibilitychange", () => {
+    if(document.hidden && currentScreen === "game" && running) pauseGame();
+  });
+
+  window.addEventListener("resize", onResize);
+  window.addEventListener("orientationchange", () => {
+    applyOrientation();
+    setTimeout(() => {
+      if(currentScreen === "game") resizeCanvas();
+    }, 250);
+  });
+}
+
+function onResize(){
+  applyOrientation();
+  if(currentScreen === "game"){
+    requestAnimationFrame(() => resizeCanvas());
+  }
+}
+
+function init(){
+  loadSave();
+  applyOrientation();
+  updateStaticText();
+  updateButtons();
+  bindEvents();
+  showScreen("title");
+}
+
+init();
+</script>
+</body>
+</html>
